@@ -49,5 +49,7 @@
     <Compile Include="BlockingTcp.cs" />
     <Compile Include="BlockingStream.cs" />
     <Compile Include="BlockingTcpListener.cs" />
+    <Compile Include="BlockingPipe.cs" />
+    <Compile Include="BlockingPipeListener.cs" />
   </ItemGroup>
 </Project>

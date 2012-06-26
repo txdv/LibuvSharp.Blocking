@@ -10,7 +10,35 @@ namespace Test
 	{
 		public static void Main(string[] args)
 		{
-			TcpMain(args);
+			PipeMain(args);
+		}
+
+		public static void PipeMain(string[] args)
+		{
+			new MicroThread(() => {
+				var server = new BlockingPipeListener();
+				server.Bind("file");
+				var pipe = server.Accept();
+				server.Close();
+				byte[] data = new byte[512];
+				int n = 0;
+				while ((n = pipe.Receive(data)) != 0) {
+					Console.WriteLine(n);
+					Console.WriteLine(Encoding.ASCII.GetString(data, 0, n));
+				}
+				pipe.Close();
+			}).Start();
+
+			new MicroThread(() => {
+				var pipe = new BlockingPipe();
+				pipe.Connect("file");
+				var bytes = Encoding.ASCII.GetBytes("NESAMONE");
+				pipe.Write(bytes);
+				pipe.Close();
+			}).Start();
+
+			Loop.Default.BlockingRun();
+
 		}
 
 		public static void TcpMain(string[] args)

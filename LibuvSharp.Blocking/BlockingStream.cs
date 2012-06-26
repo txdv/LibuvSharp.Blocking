@@ -30,6 +30,7 @@ namespace LibuvSharp.Blocking
 		}
 
 		bool init = false;
+		bool closed = false;
 		public int Receive(byte[] data)
 		{
 			var tm = Loop.GetMicroThreadCollection();
@@ -42,18 +43,28 @@ namespace LibuvSharp.Blocking
 						t.State = MicroThreadState.Ready;
 					}
 				};
+
+				Stream.CloseEvent += () => {
+					closed = true;
+					if (t.State == MicroThreadState.Blocking) {
+						t.State = MicroThreadState.Ready;
+					}
+				};
 				Stream.Resume();
+				init = true;
 			}
 
-			if (buffers.Length > 0) {
-				return Copy(data);
-			} else {
+
+			if (t.Continuation.Store(0) == 0) {
 				t.State = MicroThreadState.Blocking;
-				if (t.Continuation.Store(0) == 0) {
-					tm.Next();
+				tm.Next();
+				return 0;
+			} else {
+				if (closed) {
 					return 0;
 				} else {
-					return Copy(data);
+					int n = Copy(data);
+					return n;
 				}
 			}
 		}

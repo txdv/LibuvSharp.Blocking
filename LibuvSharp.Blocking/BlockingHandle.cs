@@ -14,16 +14,7 @@ namespace LibuvSharp.Blocking
 
 		public void Close()
 		{
-			var tm = Loop.GetMicroThreadCollection();
-			var t = tm.ActiveThread;
-			Handle.Close(() => {
-				t.State = MicroThreadState.Ready;
-			});
-			t.State = MicroThreadState.Blocking;
-
-			if (t.Continuation.Store(0) == 0) {
-				tm.Next();
-			}
+			Handle.Close();
 		}
 
 		public bool Closing {

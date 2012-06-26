@@ -17,6 +17,14 @@ namespace LibuvSharp.Blocking
 		{
 		}
 
+		internal BlockingTcp(Tcp tcp)
+			: base(tcp.Loop)
+		{
+			Handle = tcp;
+			Stream = tcp;
+			Tcp = tcp;
+		}
+
 		public void Connect(IPEndPoint ep)
 		{
 			var tm = Loop.GetMicroThreadCollection();
@@ -43,6 +51,16 @@ namespace LibuvSharp.Blocking
 					throw ex;
 				}
 			}
+		}
+
+		public void Connect(IPAddress address, int port)
+		{
+			Connect(new IPEndPoint(address, port));
+		}
+
+		public void Connect(string address, int port)
+		{
+			Connect(IPAddress.Parse(address), port);
 		}
 	}
 }

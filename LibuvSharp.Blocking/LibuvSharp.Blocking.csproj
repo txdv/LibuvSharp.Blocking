@@ -48,5 +48,6 @@
     <Compile Include="BlockingHandle.cs" />
     <Compile Include="BlockingTcp.cs" />
     <Compile Include="BlockingStream.cs" />
+    <Compile Include="BlockingTcpListener.cs" />
   </ItemGroup>
 </Project>

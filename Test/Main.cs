@@ -10,15 +10,34 @@ namespace Test
 	{
 		public static void Main(string[] args)
 		{
+			TcpMain(args);
+		}
+
+		public static void TcpMain(string[] args)
+		{
+			new MicroThread(() => {
+				var server = new BlockingTcpListener();
+				server.Bind("127.0.0.1", 7000);
+				var tcp = server.Accept();
+				tcp.Write(Encoding.ASCII.GetBytes("ASD"));
+				tcp.Close();
+				server.Close();
+			}).Start();
+
 			new MicroThread(() => {
 				var tcp = new BlockingTcp();
-				tcp.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7000));
+				tcp.Connect("127.0.0.1", 7000);
 				tcp.Write(Encoding.ASCII.GetBytes("NESAMONE"));
-				byte[] data = new byte[512];
-				int n = tcp.Receive(data);
-				Console.WriteLine (Encoding.ASCII.GetString(data, 0, n));
-				tcp.Close();
+				byte[] data = new byte[256];
+				int n = 0;
 
+				while ((n = tcp.Receive(data)) != 0) {
+					Console.WriteLine(n);
+					Console.WriteLine(Encoding.ASCII.GetString(data, 0, n));
+				}
+
+				Console.WriteLine("Closing");
+				tcp.Close();
 			}).Start();
 
 			Loop.Default.BlockingRun();

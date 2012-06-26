@@ -22,9 +22,10 @@ namespace LibuvSharp.Blocking
 		}
 
 		internal BlockingUdp(Loop loop, Udp udp)
-			: base(loop, udp)
+			: base(loop)
 		{
 			Udp = udp;
+			Handle = udp;
 		}
 
 		public void Send(IPEndPoint ep, byte[] data, int length)

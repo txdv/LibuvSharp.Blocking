@@ -8,7 +8,23 @@ namespace Test
 {
 	class MainClass
 	{
-		public static void Main (string[] args)
+		public static void Main(string[] args)
+		{
+			new MicroThread(() => {
+				var tcp = new BlockingTcp();
+				tcp.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7000));
+				tcp.Write(Encoding.ASCII.GetBytes("NESAMONE"));
+				byte[] data = new byte[512];
+				int n = tcp.Receive(data);
+				Console.WriteLine (Encoding.ASCII.GetString(data, 0, n));
+				tcp.Close();
+
+			}).Start();
+
+			Loop.Default.BlockingRun();
+		}
+
+		public static void UdpMain(string[] args)
 		{
 			new MicroThread(() => {
 				var udp = new BlockingUdp();

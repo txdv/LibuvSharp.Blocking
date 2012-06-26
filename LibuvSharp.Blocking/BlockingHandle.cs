@@ -2,13 +2,14 @@ using System;
 
 namespace LibuvSharp.Blocking
 {
-	public class BlockingHandle
+	public abstract class BlockingHandle
 	{
-		public Loop Loop { get { return Handle.Loop; } }
-		Handle Handle { get; set; }
-		public BlockingHandle(Loop loop, Handle handle)
+		public Loop Loop { get; protected set; }
+		protected Handle Handle { get; set; }
+
+		public BlockingHandle(Loop loop)
 		{
-			Handle = handle;
+			Loop = loop;
 		}
 
 		public void Close()

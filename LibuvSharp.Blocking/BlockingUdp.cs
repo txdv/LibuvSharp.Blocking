@@ -22,11 +22,11 @@ namespace LibuvSharp.Blocking
 			Udp = new Udp(loop);
 		}
 
-		public void Send(string address, int port, byte[] data)
+		public void Send(IPEndPoint ep, byte[] data, int length)
 		{
 			var tm = Loop.GetMicroThreadCollection();
 			var t = tm.ActiveThread;
-			Udp.Send(address, port, data, (_) => {
+			Udp.Send(ep, data, length, (_) => {
 				t.State = MicroThreadState.Ready;
 			});
 			t.State = MicroThreadState.Blocking;
@@ -36,6 +36,30 @@ namespace LibuvSharp.Blocking
 			}
 		}
 
+		public void Send(IPEndPoint ep, byte[] data)
+		{
+			Send(ep, data, data.Length);
+		}
+
+		public void Send(IPAddress address, int port, byte[] data, int length)
+		{
+			Send(new IPEndPoint(address, port), data, length);
+		}
+
+		public void Send(IPAddress address, int port, byte[] data)
+		{
+			Send(address, port, data, data.Length);
+		}
+
+		public void Send(string address, int port, byte[] data, int length)
+		{
+			Send(IPAddress.Parse(address), port, data, length);
+		}
+
+		public void Send(string address, int port, byte[] data)
+		{
+			Send(address, port, data, data.Length);
+		}
 
 		public void Bind(string address, int port)
 		{

@@ -5,9 +5,8 @@ using LibuvSharp;
 
 namespace LibuvSharp.Blocking
 {
-	public class BlockingUdp
+	public class BlockingUdp : BlockingHandle
 	{
-		public Loop Loop { get { return Udp.Loop; } }
 		Udp Udp { get; set; }
 
 		Queue<Tuple<IPEndPoint, byte[]>> queue = new Queue<Tuple<IPEndPoint, byte[]>>();
@@ -18,8 +17,14 @@ namespace LibuvSharp.Blocking
 		}
 
 		public BlockingUdp(Loop loop)
+			: this(loop, new Udp())
 		{
-			Udp = new Udp(loop);
+		}
+
+		internal BlockingUdp(Loop loop, Udp udp)
+			: base(loop, udp)
+		{
+			Udp = udp;
 		}
 
 		public void Send(IPEndPoint ep, byte[] data, int length)
@@ -108,20 +113,6 @@ namespace LibuvSharp.Blocking
 					data2.CopyTo(data, 0);
 					return data2.Length;
 				}
-			}
-		}
-
-		public void Close()
-		{
-			var tm = Loop.GetMicroThreadCollection();
-			var t = tm.ActiveThread;
-			Udp.Close(() => {
-				t.State = MicroThreadState.Ready;
-			});
-			t.State = MicroThreadState.Blocking;
-
-			if (t.Continuation.Store(0) == 0) {
-				tm.Next();
 			}
 		}
 	}

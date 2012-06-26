@@ -45,5 +45,6 @@
     <Compile Include="ByteBuffer.cs" />
     <Compile Include="ByteBuffers.cs" />
     <Compile Include="BlockingUdp.cs" />
+    <Compile Include="BlockingHandle.cs" />
   </ItemGroup>
 </Project>

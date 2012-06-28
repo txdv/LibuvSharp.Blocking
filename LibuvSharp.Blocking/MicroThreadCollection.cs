@@ -8,7 +8,18 @@ namespace LibuvSharp.Blocking
 	class MicroThreadCollection : List<MicroThread>
 	{
 		public Loop Loop { get; protected set; }
-		public MicroThread ActiveThread { get { return enumerator == null ? null : enumerator.Current; } }
+		public static MicroThreadCollection Active {
+			get {
+				var id = System.Threading.Thread.CurrentThread.ManagedThreadId;
+				return threads[id];
+			}
+		}
+
+		public MicroThread ActiveThread {
+			get {
+				return enumerator == null ? null : enumerator.Current;
+			}
+		}
 
 		internal MicroThreadCollection(Loop loop)
 		{
@@ -35,7 +46,7 @@ namespace LibuvSharp.Blocking
 			Loop.RunAsync();
 		}
 
-		Dictionary<int, MicroThreadCollection> threads = new Dictionary<int, MicroThreadCollection>();
+		static Dictionary<int, MicroThreadCollection> threads = new Dictionary<int, MicroThreadCollection>();
 		Continuation Continuation { get; set; }
 		IEnumerator<MicroThread> enumerator = null;
 

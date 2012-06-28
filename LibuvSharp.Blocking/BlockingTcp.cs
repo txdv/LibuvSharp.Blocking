@@ -8,12 +8,7 @@ namespace LibuvSharp.Blocking
 		Tcp Tcp { get; set; }
 
 		public BlockingTcp()
-			: this(Loop.Default)
-		{
-		}
-
-		public BlockingTcp(Loop loop)
-			: base(loop)
+			: base(MicroThreadCollection.Active.Loop)
 		{
 		}
 

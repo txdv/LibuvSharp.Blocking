@@ -8,11 +8,11 @@ namespace LibuvSharp.Blocking
 		TcpListener TcpListener { get; set; }
 
 		public BlockingTcpListener()
-			: this(Loop.Default)
+			: this(MicroThreadCollection.Active.Loop)
 		{
 		}
 
-		public BlockingTcpListener(Loop loop)
+		BlockingTcpListener(Loop loop)
 			: base(loop)
 		{
 			TcpListener = new TcpListener(loop);

@@ -12,11 +12,11 @@ namespace LibuvSharp.Blocking
 		Queue<Tuple<IPEndPoint, byte[]>> queue = new Queue<Tuple<IPEndPoint, byte[]>>();
 
 		public BlockingUdp()
-			: this(Loop.Default)
+			: this(MicroThreadCollection.Active.Loop)
 		{
 		}
 
-		public BlockingUdp(Loop loop)
+		private BlockingUdp(Loop loop)
 			: this(loop, new Udp())
 		{
 		}

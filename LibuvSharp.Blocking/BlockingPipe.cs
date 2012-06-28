@@ -7,12 +7,7 @@ namespace LibuvSharp.Blocking
 		Pipe Pipe { get; set; }
 
 		public BlockingPipe()
-			: base(Loop.Default)
-		{
-		}
-
-		public BlockingPipe(Loop loop)
-			: base(loop)
+			: base(MicroThreadCollection.Active.Loop)
 		{
 		}
 

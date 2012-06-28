@@ -7,11 +7,11 @@ namespace LibuvSharp.Blocking
 		PipeListener PipeListener { get; set; }
 
 		public BlockingPipeListener()
-			: this(Loop.Default)
+			: this(MicroThreadCollection.Active.Loop)
 		{
 		}
 
-		public BlockingPipeListener(Loop loop)
+		BlockingPipeListener(Loop loop)
 			: base(loop)
 		{
 			PipeListener = new PipeListener(loop);

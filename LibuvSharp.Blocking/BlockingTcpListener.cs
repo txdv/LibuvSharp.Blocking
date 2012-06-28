@@ -32,7 +32,7 @@ namespace LibuvSharp.Blocking
 			TcpListener = new TcpListener();
 			Listener = TcpListener as Listener;
 			Handle = TcpListener;
-		}
+			}
 
 		public void Bind(IPEndPoint ep)
 		{
@@ -52,26 +52,22 @@ namespace LibuvSharp.Blocking
 		bool init = false;
 		public BlockingTcp Accept()
 		{
-			var tm = Loop.GetMicroThreadCollection();
-			var t = tm.ActiveThread;
+			var thread = Thread;
 
 			if (!init) {
 				TcpListener.Listen((Tcp tcp) => {
 					queue.Enqueue(tcp);
-					if (t.State == MicroThreadState.Blocking) {
-						t.State = MicroThreadState.Ready;
+					if (thread.State == MicroThreadState.Blocking) {
+						thread.State = MicroThreadState.Ready;
 					}
 				});
 
 				init = true;
 			}
 
-			if (t.Continuation.Store(0) == 0) {
-				tm.Next();
-				return null;
-			} else {
-				return new BlockingTcp(queue.Dequeue());
-			}
+			thread.Yield(MicroThreadState.Blocking);
+			Console.WriteLine (queue.Count);
+			return new BlockingTcp(queue.Dequeue());
 		}
 	}
 }

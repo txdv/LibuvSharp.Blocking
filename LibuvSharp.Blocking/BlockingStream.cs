@@ -15,13 +15,11 @@ namespace LibuvSharp.Blocking
 
 		public void Write(byte[] data, int length)
 		{
-			var tm = Loop.GetMicroThreadCollection();
-			var t = tm.ActiveThread;
+			var thread = Thread;
 			Stream.Write(data, length, (_) => {
-				t.State = MicroThreadState.Ready;
+				thread.State = MicroThreadState.Ready;
 			});
-
-			t.State = MicroThreadState.Blocking;
+			thread.Yield(MicroThreadState.Blocking);
 		}
 
 		public void Write(byte[] data)

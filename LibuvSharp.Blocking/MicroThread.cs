@@ -8,8 +8,9 @@ namespace LibuvSharp.Blocking
 		NotStarted,
 		Ready,
 		Running,
+		Blocking,
 		Stopped,
-		Blocking
+		Done,
 	}
 
 	public class MicroThread
@@ -26,6 +27,11 @@ namespace LibuvSharp.Blocking
 		{
 		}
 
+		public MicroThread(Action<MicroThread> callback)
+			: this(() => callback(this))
+		{
+		}
+
 		public MicroThread(Loop loop, Action callback)
 		{
 			Loop = loop;
@@ -34,6 +40,11 @@ namespace LibuvSharp.Blocking
 			Loop.GetMicroThreadCollection().Add(this);
 
 			cb = callback;
+		}
+
+		public MicroThread(Loop loop, Action<MicroThread> callback)
+			: this(loop, () => callback(this))
+		{
 		}
 
 		public void Start()
@@ -59,14 +70,31 @@ namespace LibuvSharp.Blocking
 
 		internal void Run()
 		{
+			State = MicroThreadState.Running;
 			if (Continuation == null) {
 				Continuation = new Continuation();
 				Continuation.Mark();
 				cb();
-				State = MicroThreadState.Stopped;
+				State = MicroThreadState.Done;
 				Loop.GetMicroThreadCollection().Next();
 			} else {
 				Continuation.Restore(1);
+			}
+		}
+
+
+		public void Yield()
+		{
+			Yield(MicroThreadState.Ready);
+		}
+
+		internal void Yield(MicroThreadState newState)
+		{
+			if (State == MicroThreadState.Running) {
+				State = newState;
+				if (Continuation.Store(0) == 0) {
+					Loop.GetMicroThreadCollection().Next();
+				}
 			}
 		}
 	}

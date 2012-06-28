@@ -10,7 +10,17 @@ namespace Test
 	{
 		public static void Main(string[] args)
 		{
-			YieldMain(args);
+			TimerMain(args);
+			Loop.Default.BlockingRun();
+		}
+
+		public static void TimerMain(string[] args)
+		{
+			new MicroThread((thread) => {
+				Console.WriteLine("1");
+				thread.Sleep(TimeSpan.FromSeconds(2));
+				Console.WriteLine("2");
+			}).Start();
 		}
 
 		public static void YieldMain(string[] args)
@@ -27,8 +37,6 @@ namespace Test
 				thread.Yield();
 				Console.WriteLine("Three");
 			}).Start();
-
-			Loop.Default.BlockingRun();
 		}
 
 		public static void PipeMain(string[] args)
@@ -55,8 +63,6 @@ namespace Test
 				pipe.Write(bytes);
 				pipe.Close();
 			}).Start();
-
-			Loop.Default.BlockingRun();
 		}
 
 		public static void TcpMain(string[] args)
@@ -85,8 +91,6 @@ namespace Test
 				Console.WriteLine("Closing");
 				tcp.Close();
 			}).Start();
-
-			Loop.Default.BlockingRun();
 		}
 
 		public static void UdpMain(string[] args)
@@ -106,12 +110,10 @@ namespace Test
 			new MicroThread(() => {
 				var udp = new BlockingUdp();
 				for (int i = 0; i < 10; i++) {
-					udp.Send("127.0.0.1", 7000, Encoding.ASCII.GetBytes("nesamone"));
+					udp.Send("127.0.0.1", 7000, Encoding.ASCII.GetBytes("nesamone " + i));
 				}
 				udp.Close();
 			}).Start();
-
-			Loop.Default.BlockingRun();
 		}
 	}
 }

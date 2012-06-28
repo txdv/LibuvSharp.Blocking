@@ -113,6 +113,16 @@ namespace LibuvSharp.Blocking
 				throw new Exception();
 			}
 		}
+
+		public void Sleep(TimeSpan span)
+		{
+			Timer timer = new Timer(Loop);
+			timer.Start(span, TimeSpan.Zero, () => {
+				timer.Close();
+				Resume();
+			});
+			Block();
+		}
 	}
 }
 

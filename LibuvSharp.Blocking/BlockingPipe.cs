@@ -26,8 +26,7 @@ namespace LibuvSharp.Blocking
 
 		public void Connect(string file)
 		{
-			var tm = Loop.GetMicroThreadCollection();
-			var t = tm.ActiveThread;
+			var thread = Thread;
 			Exception ex = null;
 
 			Pipe.Connect(Loop, file, (exception, pipe) => {
@@ -38,17 +37,12 @@ namespace LibuvSharp.Blocking
 					Stream = pipe;
 					Pipe = pipe;
 				}
-				t.State = MicroThreadState.Ready;
+				thread.State = MicroThreadState.Ready;
 			});
 
-			t.State = MicroThreadState.Blocking;
-
-			if (t.Continuation.Store(0) == 0) {
-				tm.Next();
-			} else {
-				if (ex != null) {
-					throw ex;
-				}
+			thread.Yield(MicroThreadState.Blocking);
+			if (ex != null) {
+				throw ex;
 			}
 		}
 	}

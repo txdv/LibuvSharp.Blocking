@@ -30,26 +30,21 @@ namespace LibuvSharp.Blocking
 		bool init = false;
 		public BlockingPipe Accept()
 		{
-			var tm = Loop.GetMicroThreadCollection();
-			var t = tm.ActiveThread;
+			var thread = Thread;
 
 			if (!init) {
 				PipeListener.Listen((pipe) => {
 					queue.Enqueue(pipe as Pipe);
-					if (t.State == MicroThreadState.Blocking) {
-						t.State = MicroThreadState.Ready;
+					if (thread.State == MicroThreadState.Blocking) {
+						thread.State = MicroThreadState.Ready;
 					}
 				});
 
 				init = true;
 			}
 
-			if (t.Continuation.Store(0) == 0) {
-				tm.Next();
-				return null;
-			} else {
-				return new BlockingPipe(queue.Dequeue());
-			}
+			thread.Yield();
+			return new BlockingPipe(queue.Dequeue());
 		}
 	}
 }

@@ -10,38 +10,38 @@ namespace Test
 	{
 		public static void Main(string[] args)
 		{
-			TimerMain(args);
+			UdpMain(args);
 			Loop.Default.BlockingRun();
 		}
 
 		public static void TimerMain(string[] args)
 		{
-			new MicroThread((thread) => {
+			new MicroThread(() => {
 				Console.WriteLine("1");
-				MicroThread.Sleep(TimeSpan.FromSeconds(2));
+				MicroThread.Active.Sleep(TimeSpan.FromSeconds(2));
 				Console.WriteLine("2");
 			}).Start();
 		}
 
 		public static void YieldMain(string[] args)
 		{
-			new MicroThread((thread) => {
-				thread.Yield();
+			new MicroThread(() => {
+				MicroThread.Active.Yield();
 				Console.WriteLine("Two");
-				thread.Yield();
+				MicroThread.Active.Yield();
 				Console.WriteLine("Four");
 			}).Start();
 
-			new MicroThread((thread) => {
+			new MicroThread(() => {
 				Console.WriteLine("One");
-				thread.Yield();
+				MicroThread.Active.Yield();
 				Console.WriteLine("Three");
 			}).Start();
 		}
 
 		public static void PipeMain(string[] args)
 		{
-			new MicroThread((thread) => {
+			new MicroThread(() => {
 				var server = new BlockingPipeListener();
 				server.Bind("file");
 				var pipe = server.Accept();

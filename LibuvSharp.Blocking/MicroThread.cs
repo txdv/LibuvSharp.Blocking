@@ -123,6 +123,12 @@ namespace LibuvSharp.Blocking
 			});
 			Block();
 		}
+
+		public static MicroThread Active {
+			get {
+				return MicroThreadCollection.Active.ActiveThread;
+			}
+		}
 	}
 }
 

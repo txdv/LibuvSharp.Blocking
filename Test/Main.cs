@@ -18,7 +18,7 @@ namespace Test
 		{
 			new MicroThread((thread) => {
 				Console.WriteLine("1");
-				thread.Sleep(TimeSpan.FromSeconds(2));
+				MicroThread.Sleep(TimeSpan.FromSeconds(2));
 				Console.WriteLine("2");
 			}).Start();
 		}

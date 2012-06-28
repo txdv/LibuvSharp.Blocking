@@ -6,10 +6,17 @@ namespace LibuvSharp.Blocking
 	{
 		public Loop Loop { get; protected set; }
 		protected Handle Handle { get; set; }
+		MicroThreadCollection ThreadCollection { get; set; }
+		protected MicroThread Thread {
+			get {
+				return ThreadCollection.ActiveThread;
+			}
+		}
 
 		public BlockingHandle(Loop loop)
 		{
 			Loop = loop;
+			ThreadCollection = Loop.GetMicroThreadCollection();
 		}
 
 		public void Close()

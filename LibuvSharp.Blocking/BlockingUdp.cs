@@ -30,13 +30,11 @@ namespace LibuvSharp.Blocking
 
 		public void Send(IPEndPoint ep, byte[] data, int length)
 		{
-			var tm = Loop.GetMicroThreadCollection();
-			var t = tm.ActiveThread;
+			var thread = Thread;
 			Udp.Send(ep, data, length, (_) => {
-				t.State = MicroThreadState.Ready;
+				thread.State = MicroThreadState.Ready;
 			});
-
-			t.Yield(MicroThreadState.Blocking);
+			thread.Yield(MicroThreadState.Blocking);
 		}
 
 		public void Send(IPEndPoint ep, byte[] data)
@@ -76,13 +74,12 @@ namespace LibuvSharp.Blocking
 
 		public int ReceiveFrom(byte[] data, ref IPEndPoint ep)
 		{
-			var tm = Loop.GetMicroThreadCollection();
-			var t = tm.ActiveThread;
+			var thread = Thread;
 
 			if (!receiveing) {
 				Udp.Receive((_ep, _data) => {
-					if (t.State == MicroThreadState.Blocking) {
-						t.State = MicroThreadState.Ready;
+					if (thread.State == MicroThreadState.Blocking) {
+						thread.State = MicroThreadState.Ready;
 						ep2 = _ep;
 						data2 = _data;
 					} else {
@@ -98,7 +95,7 @@ namespace LibuvSharp.Blocking
 				tuple.Item2.CopyTo(data, 0);
 				return data.Length;
 			} else {
-				t.Yield(MicroThreadState.Blocking);
+				thread.Yield(MicroThreadState.Blocking);
 				if (ep2 == null) {
 					throw new Exception();
 				}

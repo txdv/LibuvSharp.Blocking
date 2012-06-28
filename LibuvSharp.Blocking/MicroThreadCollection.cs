@@ -7,39 +7,68 @@ namespace LibuvSharp.Blocking
 {
 	class MicroThreadCollection : List<MicroThread>
 	{
-		Continuation Continuation { get; set; }
-
-		IEnumerator<MicroThread> enumerator = null;
+		public Loop Loop { get; protected set; }
+		public MicroThread ActiveThread { get { return enumerator == null ? null : enumerator.Current; } }
 
 		internal MicroThreadCollection(Loop loop)
 		{
 			Loop = loop;
 		}
 
-		public Loop Loop { get; protected set; }
-
-		public MicroThread ActiveThread { get { return enumerator == null ? null : enumerator.Current; } }
-
 		public void Run()
 		{
-			while (true) {
-				bool todo = false;
-				foreach (var thread in this) {
-					if (thread.State == MicroThreadState.Ready || thread.State == MicroThreadState.Blocking) {
-						todo = true;
-						break;
-					}
-				}
-
-				if (todo) {
-					RunOnce();
-				} else {
-					return;
-				}
+			while (Is(MicroThreadState.Ready, MicroThreadState.Blocking)) {
+				Drain();
+				Run();
 			}
 		}
 
 		public void RunOnce()
+		{
+			Drain();
+			Loop.RunOnce();
+		}
+
+		public void RunAsync()
+		{
+			Drain();
+			Loop.RunAsync();
+		}
+
+		Dictionary<int, MicroThreadCollection> threads = new Dictionary<int, MicroThreadCollection>();
+		Continuation Continuation { get; set; }
+		IEnumerator<MicroThread> enumerator = null;
+
+		bool Is(params MicroThreadState[] states)
+		{
+			foreach (var thread in this) {
+				if (states.Contains(thread.State)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		void Drain(Action callback)
+		{
+			var id = System.Threading.Thread.CurrentThread.ManagedThreadId;
+			threads[id] = this;
+
+			callback();
+
+			threads.Remove(id);
+		}
+
+		void Drain()
+		{
+			Drain(() => {
+				while (Is(MicroThreadState.Ready)) {
+					ExecuteMicroThreads();
+				}
+			});
+		}
+
+		void ExecuteMicroThreads()
 		{
 			if (ActiveThread != null) {
 				throw new Exception("no thread must be active");
@@ -62,12 +91,7 @@ namespace LibuvSharp.Blocking
 			}
 		}
 
-		public void RunAsync()
-		{
-			throw new NotImplementedException();
-		}
-
-		internal void Next()
+		public void Next()
 		{
 			if (enumerator.MoveNext()) {
 				switch (ActiveThread.State) {

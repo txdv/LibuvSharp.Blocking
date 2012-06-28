@@ -10,15 +10,34 @@ namespace Test
 	{
 		public static void Main(string[] args)
 		{
-			PipeMain(args);
+			YieldMain(args);
+		}
+
+		public static void YieldMain(string[] args)
+		{
+			new MicroThread((thread) => {
+				thread.Yield();
+				Console.WriteLine("Two");
+				thread.Yield();
+				Console.WriteLine("Four");
+			}).Start();
+
+			new MicroThread((thread) => {
+				Console.WriteLine("One");
+				thread.Yield();
+				Console.WriteLine("Three");
+			}).Start();
+
+			Loop.Default.BlockingRun();
 		}
 
 		public static void PipeMain(string[] args)
 		{
-			new MicroThread(() => {
+			new MicroThread((thread) => {
 				var server = new BlockingPipeListener();
 				server.Bind("file");
 				var pipe = server.Accept();
+				thread.Yield();
 				server.Close();
 				byte[] data = new byte[512];
 				int n = 0;
@@ -26,6 +45,7 @@ namespace Test
 					Console.WriteLine(n);
 					Console.WriteLine(Encoding.ASCII.GetString(data, 0, n));
 				}
+
 				pipe.Close();
 			}).Start();
 
@@ -38,7 +58,6 @@ namespace Test
 			}).Start();
 
 			Loop.Default.BlockingRun();
-
 		}
 
 		public static void TcpMain(string[] args)

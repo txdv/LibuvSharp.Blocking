@@ -1,12 +1,9 @@
 using System;
-using System.Collections.Generic;
 
 namespace LibuvSharp.Blocking
 {
 	public class BlockingPipeListener : BlockingListener
 	{
-		Queue<Pipe> queue = new Queue<Pipe>();
-
 		PipeListener PipeListener { get; set; }
 
 		public BlockingPipeListener()
@@ -27,24 +24,15 @@ namespace LibuvSharp.Blocking
 			PipeListener.Bind(file);
 		}
 
-		bool init = false;
 		public BlockingPipe Accept()
 		{
-			var thread = Thread;
+			return AcceptBlockingStream() as BlockingPipe;
 
-			if (!init) {
-				PipeListener.Listen((pipe) => {
-					queue.Enqueue(pipe as Pipe);
-					if (thread.State == MicroThreadState.Blocking) {
-						thread.State = MicroThreadState.Ready;
-					}
-				});
+		}
 
-				init = true;
-			}
-
-			thread.Yield();
-			return new BlockingPipe(queue.Dequeue());
+		protected override BlockingStream Create(Stream stream)
+		{
+			return new BlockingPipe(stream as Pipe);
 		}
 	}
 }

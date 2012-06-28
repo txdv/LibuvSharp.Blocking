@@ -37,7 +37,6 @@ namespace Test
 				var server = new BlockingPipeListener();
 				server.Bind("file");
 				var pipe = server.Accept();
-				thread.Yield();
 				server.Close();
 				byte[] data = new byte[512];
 				int n = 0;

@@ -1,24 +1,10 @@
 using System;
 using System.Net;
-using System.Collections.Generic;
 
 namespace LibuvSharp.Blocking
 {
-	public abstract class BlockingListener : BlockingHandle
-	{
-		protected Listener Listener { get; set; }
-
-		public BlockingListener(Loop loop)
-			: base(loop)
-		{
-			Loop = loop;
-		}
-	}
-
 	public class BlockingTcpListener : BlockingListener
 	{
-		Queue<Tcp> queue = new Queue<Tcp>();
-
 		TcpListener TcpListener { get; set; }
 
 		public BlockingTcpListener()
@@ -29,10 +15,10 @@ namespace LibuvSharp.Blocking
 		public BlockingTcpListener(Loop loop)
 			: base(loop)
 		{
-			TcpListener = new TcpListener();
+			TcpListener = new TcpListener(loop);
 			Listener = TcpListener as Listener;
 			Handle = TcpListener;
-			}
+		}
 
 		public void Bind(IPEndPoint ep)
 		{
@@ -49,25 +35,14 @@ namespace LibuvSharp.Blocking
 			TcpListener.Bind(address, port);
 		}
 
-		bool init = false;
+		protected override BlockingStream Create(Stream stream)
+		{
+			return new BlockingTcp(stream as Tcp);
+		}
+
 		public BlockingTcp Accept()
 		{
-			var thread = Thread;
-
-			if (!init) {
-				TcpListener.Listen((Tcp tcp) => {
-					queue.Enqueue(tcp);
-					if (thread.State == MicroThreadState.Blocking) {
-						thread.State = MicroThreadState.Ready;
-					}
-				});
-
-				init = true;
-			}
-
-			thread.Yield(MicroThreadState.Blocking);
-			Console.WriteLine (queue.Count);
-			return new BlockingTcp(queue.Dequeue());
+			return AcceptBlockingStream() as BlockingTcp;
 		}
 	}
 }

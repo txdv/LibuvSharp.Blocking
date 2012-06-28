@@ -23,9 +23,7 @@ namespace LibuvSharp.Blocking
 			if (!init) {
 				Listener.Listen((stream) => {
 					queue.Enqueue(stream);
-					if (thread.State == MicroThreadState.Blocking) {
-						thread.State = MicroThreadState.Ready;
-					}
+					thread.Resume();
 				});
 
 				init = true;

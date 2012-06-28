@@ -17,7 +17,7 @@ namespace LibuvSharp.Blocking
 		{
 			var thread = Thread;
 			Stream.Write(data, length, (_) => {
-				thread.State = MicroThreadState.Ready;
+				thread.Resume();
 			});
 			thread.Yield(MicroThreadState.Blocking);
 		}

@@ -97,6 +97,13 @@ namespace LibuvSharp.Blocking
 				}
 			}
 		}
+
+		internal void Resume()
+		{
+			if (State == MicroThreadState.Blocking) {
+				State = MicroThreadState.Ready;
+			}
+		}
 	}
 }
 

@@ -27,8 +27,7 @@ namespace LibuvSharp.Blocking
 
 		public void Connect(IPEndPoint ep)
 		{
-			var tm = Loop.GetMicroThreadCollection();
-			var t = tm.ActiveThread;
+			var thread = Thread;
 			Exception ex = null;
 
 			Tcp.Connect(Loop, ep, (exception, tcp) => {
@@ -39,17 +38,13 @@ namespace LibuvSharp.Blocking
 					Stream = tcp;
 					Tcp = tcp;
 				}
-				t.State = MicroThreadState.Ready;
+				thread.Resume();
 			});
 
-			t.State = MicroThreadState.Blocking;
+			thread.Yield(MicroThreadState.Blocking);
 
-			if (t.Continuation.Store(0) == 0) {
-				tm.Next();
-			} else {
-				if (ex != null) {
-					throw ex;
-				}
+			if (ex != null) {
+				throw ex;
 			}
 		}
 

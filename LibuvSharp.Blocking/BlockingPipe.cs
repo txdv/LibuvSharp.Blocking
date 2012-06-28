@@ -37,7 +37,7 @@ namespace LibuvSharp.Blocking
 					Stream = pipe;
 					Pipe = pipe;
 				}
-				thread.State = MicroThreadState.Ready;
+				thread.Resume();
 			});
 
 			thread.Yield(MicroThreadState.Blocking);
